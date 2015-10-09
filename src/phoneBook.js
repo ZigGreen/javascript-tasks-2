@@ -2,36 +2,69 @@ import { readFileSync } from 'fs';
 
 let phoneBook = []; // Здесь вы храните записи как хотите
 
+
+class PhoneNumber {
+    static parse(numberString,defaultCountryCode) {
+
+        numberString = numberString
+            .replace(/\s/g, '')
+            .replace(/(\d)-(\d)/g,'$1$2')
+            .replace(/(\d)-(\d)/g,'$1$2');
+        const localNumber = numberString.slice(-7);
+        const regionCode = numberString.slice(0,-7).replace(/\((\d{3})\)$/, '$1');
+        const operatorCode = regionCode.slice(-3);
+        let countryCode = regionCode.slice(0,-3).replace(/^\+(\d)/g, '$1');
+        countryCode = Number(countryCode || defaultCountryCode);
+        return new PhoneNumber([countryCode, operatorCode, localNumber].join(''));
+
+    }
+
+    constructor(number) {
+        this._intNumber = Number(number);
+    }
+
+    get isValid() {
+        return !Number.isNaN(this._intNumber);
+    }
+
+    toString() {
+      return this._intNumber
+    }
+}
+
+
 const validEmailRegEx = /^[-\w.]+@([А-яA-z0-9][-А-яA-z0-9]+\.)+[А-яA-z]{2,4}$/;
-const validPhoneRegEx = /^((\+?\d{1,3})[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$/;
+
+
 /*
    Функция добавления записи в телефонную книгу.
    На вход может прийти что угодно, будьте осторожны.
 */
 export function add(name, phone, email) {
+    const phoneNumber = PhoneNumber.parse(phone, '7')
 
-    if (!validPhoneRegEx.test(phone) || !validEmailRegEx.test(email)) {
+    const isPhoneValid = phoneNumber.isValid;
+    const isEmailValide = validEmailRegEx.test(email);
+
+    if (!isPhoneValid || !isEmailValide) {
         console.warn(`Неверный формат для контакта ${name} ${phone} ${email}`);
         return false;
     }
     //TODO: задетектить дубликаты
-    //TODO: приводить телефон к одному формату
-    phoneBook.push({name, phone, email});
+    phoneBook.push({name, phoneNumber, email});
 
 }
 
 function matchRecordByQuery(record, query) {
     //TODO: написать коменты
-    return Object
-            .keys(record)
+    return Object.keys(record)
             .map(key => record[key])
-            .map(value => Boolean(value.indexOf(query)+1))
+            .map(value => Boolean(String(value).indexOf(query)+1))
             .reduce((mem,v) => mem + v, 0);
 }
 
 function recordToString(record) {
-    return Object
-        .keys(record)
+    return Object.keys(record)
         .map(key => record[key])
         .join(', ');
 }
@@ -46,7 +79,6 @@ export function find(query) {
         .filter(record => matchRecordByQuery(record, query))
         .map(recordToString)
         .forEach(recordString => console.log(recordString));
-    // Ваша удивительная магия здесь
 
 }
 
@@ -56,7 +88,6 @@ export function find(query) {
 export function remove(query) {
     phoneBook = phoneBook
         .filter(record => !matchRecordByQuery(record, query));
-    // Ваша необьяснимая магия здесь
 
 }
 
@@ -66,9 +97,6 @@ export function remove(query) {
 export function importFromCsv(filename) {
     var data = readFileSync(filename, 'utf-8');
 
-    // Ваша чёрная магия:
-    // - Разбираете записи из `data`
-    // - Добавляете каждую запись в книгу
 }
 
 function renderTable(arr, width, height) {
