@@ -18,20 +18,23 @@ export function add(name, phone, email) {
     const isEmailValid = validEmailRegEx.test(email);
 
     if (!isPhoneValid || !isEmailValid) {
-        console.warn(`Неверный формат для контакта: ${name} ${phone} ${email}`);
         return false;
     }
+
     //TODO: задетектить дубликаты
     phoneBook.push({name, phoneNumber, email});
-
+    return true;
 }
 
 function matchRecordByQuery(record, query) {
 
-    //TODO: написать коменты
+    //dummy realization
     return Object.keys(record)
+        // gets the values
         .map(key => record[key])
+        // search by substring
         .map(value => Boolean(String(value).indexOf(query) + 1))
+        // check if some have been matched
         .reduce((mem, v) => mem + v, 0);
 }
 
@@ -60,7 +63,6 @@ export function find(query) {
 export function remove(query) {
     phoneBook = phoneBook
         .filter(record => !matchRecordByQuery(record, query));
-
 }
 
 /*
@@ -68,7 +70,6 @@ export function remove(query) {
  */
 export function importFromCsv(filename) {
     var data = readFileSync(filename, 'utf-8');
-
 }
 
 function recordToArray({name, phoneNumber, email}) {
@@ -80,6 +81,4 @@ function recordToArray({name, phoneNumber, email}) {
 export function showTable(filename) {
     const table = new AsciiTable({headers: ['name', 'phone', 'email']});
     console.log(table.render(phoneBook.map(recordToArray)));
-    // Ваша чёрная магия здесь
-
 }
