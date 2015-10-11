@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import PhoneNumber from './PhoneNumber';
-import AsciTable from './AsciTable';
+import AsciiTable from './AsciiTable';
 import 'babel/polyfill';
 
 let phoneBook = []; // Здесь вы храните записи как хотите
@@ -78,7 +78,7 @@ function recordToArray({name, phoneNumber, email}) {
  Функция вывода всех телефонов в виде ASCII (задача со звёздочкой!).
  */
 export function showTable(filename) {
-    const table = new AsciTable({headers: ['name', 'phone', 'email']});
+    const table = new AsciiTable({headers: ['name', 'phone', 'email']});
     console.log(table.render(phoneBook.map(recordToArray)));
     // Ваша чёрная магия здесь
 
